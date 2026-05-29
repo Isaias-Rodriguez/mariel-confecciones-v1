@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Mariel Confecciones</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .input-password {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .input-password input {
+      width: 100%;
+      padding-right: 44px;
+    }
+
+    #togglePassword {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="contenedor">
+    <h1>Panel de administración</h1>
+
+    <section class="seccion" id="login-box">
+      <h2>Ingresar</h2>
+
+      <input type="email" id="email" placeholder="Correo electrónico"><br><br>
+
+      <div class="input-password">
+        <input type="password" id="password" placeholder="Contraseña">
+        <span id="togglePassword">👁️</span>
+      </div><br><br>
+
+      <button id="btn-login" class="btn-card">Ingresar</button>
+      <button id="btn-recuperar" class="btn-link" type="button">¿Olvidaste tu contraseña?</button>
+      <p id="mensaje-login"></p>
+    </section>
+
+    <section class="seccion" id="admin-box" style="display:none;">
+      <div class="admin-panel">
+        <div class="admin-formulario">
+          <h2 id="titulo-formulario">Agregar producto</h2>
+
+          <input type="text" id="nombre" placeholder="Nombre"><br><br>
+          <input type="text" id="descripcion" placeholder="Descripción"><br><br>
+          <input type="number" id="precio" placeholder="Precio (opcional)"><br><br>
+
+          <select id="categoria">
+            <option value="guardapolvos">Guardapolvos</option>
+            <option value="remeras">Remeras</option>
+            <option value="chombas">Chombas</option>
+            <option value="bordados">Bordados</option>
+            <option value="estampados">Estampados y Sublimados</option>
+          </select><br><br>
+
+          <input type="file" id="imagen" accept="image/*"><br><br>
+
+          <div class="preview-box">
+            <p><strong>Vista previa:</strong></p>
+            <img id="preview-imagen" src="" alt="Vista previa" style="display:none;">
+            <p id="sin-preview">No hay imagen seleccionada</p>
+          </div><br>
+
+          <label>
+            <input type="checkbox" id="liquidacion"> En liquidación
+          </label><br><br>
+
+         <div class="grupo-botones">
+         <button id="btn-guardar" class="btn-card" type="button">Guardar producto</button>
+         <button id="btn-cancelar-edicion" class="btn-card btn-secundario" type="button" style="display:none;">Cancelar edición</button>
+            
+        </div>
+        
+<p id="mensaje"></p>
+
+
+<div class="grupo-secundario">
+  <button id="btn-logout" class="btn-logout" type="button">Cerrar sesión</button>
+</div>
+
+        <div class="admin-listado">
+          <div class="barra-admin">
+            <h2>Productos cargados</h2>
+
+            <div class="filtros-admin">
+              <select id="filtro-categoria">
+                <option value="todos">Todas las categorías</option>
+                <option value="guardapolvos">Guardapolvos</option>
+                <option value="remeras">Remeras</option>
+                <option value="chombas">Chombas</option>
+                <option value="bordados">Bordados</option>
+                <option value="estampados">Estampados y Sublimados</option>
+              </select>
+
+              <button id="btn-limpiar-filtro" class="btn-card btn-secundario" type="button">Limpiar filtro</button>
+            </div>
+          </div>
+
+          <div class="tabla-responsive">
+            <table class="tabla-admin">
+              <thead>
+                <tr>
+                  <th>Imagen</th>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Precio</th>
+                  <th>Categoría</th>
+                  <th>Liquidación</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-productos-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <script>
+    const loginBox = document.getElementById("login-box");
+    const adminBox = document.getElementById("admin-box");
+    const mensajeLogin = document.getElementById("mensaje-login");
+    const mensaje = document.getElementById("mensaje");
+
+    const btnLogin = document.getElementById("btn-login");
+    const btnGuardar = document.getElementById("btn-guardar");
+    const btnLogout = document.getElementById("btn-logout");
+    const btnCancelarEdicion = document.getElementById("btn-cancelar-edicion");
+    const btnLimpiarFiltro = document.getElementById("btn-limpiar-filtro");
+
+    const tituloFormulario = document.getElementById("titulo-formulario");
+    const tablaBody = document.getElementById("tabla-productos-body");
+    const filtroCategoria = document.getElementById("filtro-categoria");
+
+    const inputImagen = document.getElementById("imagen");
+    const previewImagen = document.getElementById("preview-imagen");
+    const sinPreview = document.getElementById("sin-preview");
+
+    const togglePassword = document.getElementById("togglePassword");
+    const inputPassword = document.getElementById("password");
+
+    const btnRecuperar = document.getElementById("btn-recuperar");
+
+    let productoEditandoId = null;
+    let imagenActual = "";
+
+    function mostrarPreview(src) {
+      if (src) {
+        previewImagen.src = src;
+        previewImagen.style.display = "block";
+        sinPreview.style.display = "none";
+      } else {
+        previewImagen.src = "";
+        previewImagen.style.display = "none";
+        sinPreview.style.display = "block";
+      }
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("nombre").value = "";
+      document.getElementById("descripcion").value = "";
+      document.getElementById("precio").value = "";
+      document.getElementById("categoria").value = "guardapolvos";
+      document.getElementById("imagen").value = "";
+      document.getElementById("liquidacion").checked = false;
+
+      productoEditandoId = null;
+      imagenActual = "";
+
+      tituloFormulario.textContent = "Agregar producto";
+      btnGuardar.textContent = "Guardar producto";
+      btnCancelarEdicion.style.display = "none";
+
+      mostrarPreview("");
+    }
+
+    function obtenerRutaStorageDesdeUrl(url) {
+      if (!url) return "";
+
+      try {
+        const partes = url.split("/productos/");
+        if (partes.length < 2) return "";
+        return decodeURIComponent(partes[1]);
+      } catch (error) {
+        console.error("Error obteniendo ruta:", error);
+        return "";
+      }
+    }
+
+    async function borrarImagenDelBucket(imagenUrl) {
+      if (!imagenUrl) {
+        return { ok: true };
+      }
+
+      const rutaArchivo = obtenerRutaStorageDesdeUrl(imagenUrl);
+
+      if (!rutaArchivo) {
+        return {
+          ok: false,
+          error: "No se pudo obtener la ruta del archivo"
+        };
+      }
+
+      const { error } = await window.supabaseClient.storage
+        .from("productos")
+        .remove([rutaArchivo]);
+
+      if (error) {
+        return {
+          ok: false,
+          error: error.message
+        };
+      }
+
+      return { ok: true };
+    }
+
+    async function verificarSesion() {
+      const { data } = await window.supabaseClient.auth.getSession();
+
+      if (data.session) {
+        loginBox.style.display = "none";
+        adminBox.style.display = "block";
+        await cargarProductosAdmin();
+      } else {
+        loginBox.style.display = "block";
+        adminBox.style.display = "none";
+      }
+    }
+
+    async function cargarProductosAdmin() {
+      let query = window.supabaseClient
+        .from("productos")
+        .select("*")
+        .eq("activo", true)
+        .order("id", { ascending: false });
+
+      if (filtroCategoria.value !== "todos") {
+        query = query.eq("categoria", filtroCategoria.value);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error al cargar productos:", error);
+        mensaje.textContent = "Error al cargar productos";
+        return;
+      }
+
+      tablaBody.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        tablaBody.innerHTML = `
+          <tr>
+            <td colspan="7">No hay productos cargados para ese filtro.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      data.forEach((producto) => {
+        const tr = document.createElement("tr");
+
+        const precioTexto = producto.precio
+          ? `$${producto.precio}`
+          : "Consultar";
+
+        tr.innerHTML = `
+          <td>
+            ${
+              producto.imagen_url
+                ? `<img src="${producto.imagen_url}" alt="${producto.nombre}" class="miniatura-admin">`
+                : "Sin imagen"
+            }
+          </td>
+          <td>${producto.nombre || ""}</td>
+          <td>${producto.descripcion || ""}</td>
+          <td>${precioTexto}</td>
+          <td>${producto.categoria || ""}</td>
+          <td>${producto.en_liquidacion ? "Sí" : "No"}</td>
+          <td>
+            <button class="btn-card btn-tabla" onclick="editarProducto(${producto.id})">Editar</button>
+            <button class="btn-card btn-tabla btn-eliminar" onclick="eliminarProducto(${producto.id}, '${(producto.nombre || "").replace(/'/g, "\\'")}')">Eliminar</button>
+          </td>
+        `;
+
+        tablaBody.appendChild(tr);
+      });
+    }
+
+    async function editarProducto(id) {
+      mensaje.textContent = "Cargando producto...";
+
+      const { data, error } = await window.supabaseClient
+        .from("productos")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error al cargar producto:", error);
+        mensaje.textContent = "Error al cargar producto";
+        return;
+      }
+
+      document.getElementById("nombre").value = data.nombre || "";
+      document.getElementById("descripcion").value = data.descripcion || "";
+      document.getElementById("precio").value = data.precio || "";
+      document.getElementById("categoria").value = data.categoria || "guardapolvos";
+      document.getElementById("liquidacion").checked = !!data.en_liquidacion;
+      document.getElementById("imagen").value = "";
+
+      productoEditandoId = data.id;
+      imagenActual = data.imagen_url || "";
+
+      tituloFormulario.textContent = "Editar producto";
+      btnGuardar.textContent = "Actualizar producto";
+      btnCancelarEdicion.style.display = "inline-block";
+
+      mostrarPreview(imagenActual);
+      mensaje.textContent = "Producto cargado para edición";
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    async function eliminarProducto(id, nombre) {
+      const confirmar = confirm(`¿Querés eliminar el producto "${nombre}"?`);
+      if (!confirmar) return;
+
+      mensaje.textContent = "Eliminando producto...";
+
+      const { data: producto, error: errorProducto } = await window.supabaseClient
+        .from("productos")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (errorProducto) {
+        console.error("Error al obtener el producto:", errorProducto);
+        mensaje.textContent = "Error al obtener el producto";
+        return;
+      }
+
+      if (producto.imagen_url) {
+        const resultadoBorradoImagen = await borrarImagenDelBucket(producto.imagen_url);
+
+        if (!resultadoBorradoImagen.ok) {
+          console.error("Error al borrar imagen del bucket:", resultadoBorradoImagen.error);
+          mensaje.textContent = "No se pudo borrar la imagen del bucket";
+          return;
+        }
+      }
+
+      const { error } = await window.supabaseClient
+        .from("productos")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error al eliminar producto:", error);
+        mensaje.textContent = "Error al eliminar producto";
+        return;
+      }
+
+      mensaje.textContent = "Producto e imagen eliminados correctamente";
+      await cargarProductosAdmin();
+
+      if (productoEditandoId === id) {
+        limpiarFormulario();
+      }
+    }
+
+    btnLogin.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      const { error } = await window.supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      btnRecuperar.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    mensajeLogin.textContent = "Ingresá tu correo para recuperar la contraseña";
+    return;
+  }
+
+  const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/admin.html"
+  });
+
+  if (error) {
+    mensajeLogin.textContent = "No se pudo enviar el correo de recuperación";
+    console.error(error);
+    return;
+  }
+
+  mensajeLogin.textContent = "Te enviamos un correo para recuperar la contraseña";
+});
+
+      if (error) {
+        mensajeLogin.textContent = "Error al iniciar sesión";
+        console.error(error);
+        return;
+      }
+
+      mensajeLogin.textContent = "Ingreso correcto";
+      await verificarSesion();
+    });
+
+    btnGuardar.addEventListener("click", async () => {
+      const nombre = document.getElementById("nombre").value.trim();
+      const descripcion = document.getElementById("descripcion").value.trim();
+      const precio = document.getElementById("precio").value.trim();
+      const categoria = document.getElementById("categoria").value;
+      const en_liquidacion = document.getElementById("liquidacion").checked;
+      const archivo = document.getElementById("imagen").files[0];
+
+      if (!nombre || !descripcion || !categoria) {
+        mensaje.textContent = "Completá los campos obligatorios";
+        return;
+      }
+
+      mensaje.textContent = productoEditandoId ? "Actualizando..." : "Guardando...";
+
+      let imagen_url = imagenActual;
+      let seSubioNuevaImagen = false;
+
+      if (archivo) {
+        const nombreArchivo = `${Date.now()}-${archivo.name}`;
+
+        const { error: errorUpload } = await window.supabaseClient.storage
+          .from("productos")
+          .upload(nombreArchivo, archivo);
+
+        if (errorUpload) {
+          mensaje.textContent = "Error al subir imagen";
+          console.error(errorUpload);
+          return;
+        }
+
+        const { data: urlData } = window.supabaseClient.storage
+          .from("productos")
+          .getPublicUrl(nombreArchivo);
+
+        imagen_url = urlData.publicUrl;
+        seSubioNuevaImagen = true;
+      }
+
+      const producto = {
+        nombre,
+        descripcion,
+        precio: precio ? Number(precio) : null,
+        categoria,
+        imagen_url,
+        en_liquidacion,
+        activo: true
+      };
+
+      if (productoEditandoId) {
+        if (seSubioNuevaImagen && imagenActual && imagenActual !== imagen_url) {
+          const resultadoBorradoImagenVieja = await borrarImagenDelBucket(imagenActual);
+
+          if (!resultadoBorradoImagenVieja.ok) {
+            console.error("Error al borrar imagen vieja:", resultadoBorradoImagenVieja.error);
+            mensaje.textContent = "La imagen nueva subió, pero no se pudo borrar la anterior";
+          }
+        }
+
+        const { error } = await window.supabaseClient
+          .from("productos")
+          .update(producto)
+          .eq("id", productoEditandoId);
+
+        if (error) {
+          mensaje.textContent = "Error al actualizar producto";
+          console.error(error);
+          return;
+        }
+
+        mensaje.textContent = "Producto actualizado correctamente";
+      } else {
+        const { error } = await window.supabaseClient
+          .from("productos")
+          .insert([producto]);
+
+        if (error) {
+          mensaje.textContent = "Error al guardar producto";
+          console.error(error);
+          return;
+        }
+
+        mensaje.textContent = "Producto guardado correctamente";
+      }
+
+      limpiarFormulario();
+      await cargarProductosAdmin();
+    });
+
+    btnCancelarEdicion.addEventListener("click", () => {
+      limpiarFormulario();
+      mensaje.textContent = "Edición cancelada";
+    });
+
+    btnLogout.addEventListener("click", async () => {
+      await window.supabaseClient.auth.signOut();
+      limpiarFormulario();
+      await verificarSesion();
+    });
+
+    filtroCategoria.addEventListener("change", async () => {
+      await cargarProductosAdmin();
+    });
+
+    btnLimpiarFiltro.addEventListener("click", async () => {
+      filtroCategoria.value = "todos";
+      await cargarProductosAdmin();
+    });
+
+    inputImagen.addEventListener("change", () => {
+      const archivo = inputImagen.files[0];
+
+      if (!archivo) {
+        mostrarPreview(imagenActual);
+        return;
+      }
+
+      const lector = new FileReader();
+
+      lector.onload = function(e) {
+        mostrarPreview(e.target.result);
+      };
+
+      lector.readAsDataURL(archivo);
+    });
+
+    togglePassword.addEventListener("click", () => {
+      const tipo = inputPassword.getAttribute("type");
+
+      if (tipo === "password") {
+        inputPassword.setAttribute("type", "text");
+        togglePassword.textContent = "🙈";
+      } else {
+        inputPassword.setAttribute("type", "password");
+        togglePassword.textContent = "👁️";
+      }
+    });
+
+    verificarSesion();
+
+    window.editarProducto = editarProducto;
+    window.eliminarProducto = eliminarProducto;
+  </script>
+
+</body>
+</html>

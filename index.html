@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mariel Confecciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="hero">
+    <div class="contenedor">
+      <img src="logo.jpg" alt="Mariel Confecciones" class="logo">
+
+      <h1>Mariel Confecciones</h1>
+
+      <p>Guardapolvos, bordados de logos, estampados, sublimados e indumentaria femenina.</p>
+
+      <a 
+        class="btn-whatsapp" 
+        href="https://wa.me/5492634698464?text=Hola%20Mariel%20Confecciones,%20quisiera%20hacer%20una%20consulta."
+        target="_blank"
+      >
+        Consultar por WhatsApp
+      </a>
+    </div>
+  </header>
+
+  <section class="franja-beneficios">
+    <div class="contenedor beneficios-grid">
+      <div class="beneficio-card">
+        <div class="beneficio-icono">🧵</div>
+        <h3>Confección de guardapolvos a medida</h3>
+        <p>Trabajos personalizados con materiales de primera calidad.</p>
+      </div>
+
+      <div class="beneficio-card">
+        <div class="beneficio-icono">👚</div>
+        <h3>Indumentaria femenina</h3>
+        <p>Prendas y diseños pensados con estilo, comodidad y terminación prolija.</p>
+      </div>
+
+      <div class="beneficio-card">
+        <div class="beneficio-icono">🎨</div>
+        <h3>Bordados y estampados</h3>
+        <p>Opciones para personalizar prendas, guardapolvos y más.</p>
+      </div>
+    </div>
+  </section>
+
+  <main class="contenedor">
+
+    <section class="seccion">
+      <h2>Nuestros servicios</h2>
+      <p class="texto-categorias">
+        Elegí una categoría para ver sus productos.
+      </p>
+    </section>
+
+   <section id="vista-categorias" class="seccion">
+  <div class="grid-categorias">
+
+    <button class="categoria-card premium cat-guardapolvos" data-categoria="guardapolvos" type="button">
+      <div class="categoria-top">
+        <span class="cat-icono">🥼</span>
+        <span class="cat-ir">Entrar →</span>
+      </div>
+      <span class="categoria-titulo">Guardapolvos</span>
+      <p class="categoria-texto">Modelos a medida, confección personalizada y terminaciones prolijas.</p>
+    </button>
+
+    <button class="categoria-card premium cat-remeras" data-categoria="remeras" type="button">
+      <div class="categoria-top">
+        <span class="cat-icono">👕</span>
+        <span class="cat-ir">Entrar →</span>
+      </div>
+      <span class="categoria-titulo">Remeras</span>
+      <p class="categoria-texto">Prendas cómodas, diseños actuales y opciones para personalizar.</p>
+    </button>
+
+    <button class="categoria-card premium cat-chombas" data-categoria="chombas" type="button">
+      <div class="categoria-top">
+        <span class="cat-icono">👔</span>
+        <span class="cat-ir">Entrar →</span>
+      </div>
+      <span class="categoria-titulo">Chombas</span>
+      <p class="categoria-texto">Diseños clásicos y personalizados.</p>
+    </button>
+
+    <button class="categoria-card premium cat-bordados" data-categoria="bordados" type="button">
+      <div class="categoria-top">
+        <span class="cat-icono">🧵</span>
+        <span class="cat-ir">Entrar →</span>
+      </div>
+      <span class="categoria-titulo">Bordados</span>
+      <p class="categoria-texto">Logos, nombres y detalles bordados con terminación prolija.</p>
+    </button>
+
+    <button class="categoria-card premium cat-estampados" data-categoria="estampados" type="button">
+      <div class="categoria-top">
+        <span class="cat-icono">🎨</span>
+        <span class="cat-ir">Entrar →</span>
+      </div>
+      <span class="categoria-titulo">Estampados</span>
+      <p class="categoria-texto">Sublimados y estampados para prendas con identidad propia.</p>
+    </button>
+
+    <button class="categoria-card premium cat-liquidacion" data-categoria="liquidacion" type="button">
+      <div class="categoria-top">
+        <span class="cat-icono">🔥</span>
+        <span class="cat-ir">Entrar →</span>
+      </div>
+      <span class="categoria-titulo">Liquidación</span>
+      <p class="categoria-texto">Aprovechá ofertas especiales y productos disponibles a mejor precio.</p>
+    </button>
+
+  </div>
+</section>
+
+    <section id="vista-productos" class="seccion" style="display: none;">
+      <div class="cabecera-categoria">
+        <button id="btn-volver-categorias" class="btn-volver" type="button">← Volver a categorías</button>
+        <h2 id="titulo-categoria-actual"></h2>
+      </div>
+
+      <div class="grid-productos" id="productos-categoria-actual"></div>
+      <p id="mensaje-categoria-vacia" class="mensaje-vacio" style="display: none;">
+        No hay productos cargados en esta categoría.
+      </p>
+    </section>
+
+    <section class="seccion seccion-info">
+      <div class="info-card">
+        <h2>Sobre nosotros</h2>
+        <p>
+  En Mariel Confecciones ofrecemos atención personalizada en Rivadavia, Mendoza.
+  Nos dedicamos a la indumentaria femenina, guardapolvos, bordados, estampados
+  y sublimados, buscando siempre brindar un trabajo prolijo y a medida.
+</p>
+<p style="margin-top: 14px;">
+  Cada prenda es confeccionada con dedicación y materiales de calidad, 
+  pensando en la comodidad y el estilo de cada clienta.
+</p>
+<p style="margin-top: 14px;">
+  📍 Atención en el local.
+</p>
+      </div>
+
+      <div class="info-card contacto-card">
+        <h2>Contacto</h2>
+
+        <div class="item-contacto">
+          <span class="icono-contacto">📱</span>
+          <div>
+            <strong>WhatsApp</strong>
+            <p>+54 9 2634 698464</p>
+          </div>
+        </div>
+
+        <div class="item-contacto">
+          <span class="icono-contacto">📷</span>
+          <div>
+            <strong>Instagram</strong>
+            <p>
+              <a href="https://www.instagram.com/marielconfecciones" target="_blank">
+                @marielconfecciones
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="item-contacto">
+          <span class="icono-contacto">📍</span>
+          <div>
+            <strong>Ubicación</strong>
+            <p>
+              <a href="https://www.google.com/maps/search/?api=1&query=Arenales+1373+Rivadavia+Mendoza" target="_blank">
+                Arenales 1373, Rivadavia, Mendoza
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <a 
+          class="btn-whatsapp btn-contacto"
+          href="https://wa.me/5492634698464?text=Hola%20Mariel%20Confecciones,%20quisiera%20hacer%20una%20consulta."
+          target="_blank"
+        >
+          Escribir por WhatsApp
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="visor" class="visor">
+    <span id="cerrar">&times;</span>
+    <img id="imgGrande" alt="Imagen ampliada">
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
