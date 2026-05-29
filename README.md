@@ -50,6 +50,18 @@ Sitio web:
 
 https://mariel-confecciones.netlify.app
 
+## Acceso al panel administrador
+
+URL:
+
+https://mariel-confecciones.netlify.app/admin.html
+
+## Próximas mejoras (V1.1)
+
+- Mejoras visuales en la interfaz
+- Optimización para dispositivos móviles
+- Ajustes de experiencia de usuario
+
 ## Versión
 
 Versión estable: V1.0
