@@ -1,6 +1,6 @@
 # Mariel Confecciones V1.0
 
-https://github.com/Isaias-Rodriguez/mariel-confecciones-v1/blob/main/img/Captura%20de%20pantalla%202026-05-29%20185811.png
+![Vista previa del sitio](img/mariel-confecciones-home.png)
 
 ## Descripción
 
