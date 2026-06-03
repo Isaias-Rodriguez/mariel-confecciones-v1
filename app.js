@@ -13,6 +13,14 @@ function normalizarCategoria(categoria) {
     return "chombas";
   }
 
+if (
+  valor === "indumentaria femenina" ||
+  valor === "indumentaria" ||
+  valor === "femenina"
+) {
+  return "indumentaria-femenina";
+}
+
   if (valor === "bordados" || valor === "bordado") {
     return "bordados";
   }
@@ -72,18 +80,20 @@ function crearCard(producto) {
 }
 
 let productosPorCategoria = {
-  guardapolvos: [],
-  remeras: [],
-  chombas: [],
-  bordados: [],
-  estampados: [],
-  liquidacion: []
+    guardapolvos: [],
+    remeras: [],
+    chombas: [],
+    bordados: [],
+    estampados: [],
+    "indumentaria-femenina": [],
+    liquidacion: []
 };
 
 const nombresCategorias = {
   guardapolvos: "Guardapolvos",
   remeras: "Remeras",
   chombas: "Chombas",
+  "indumentaria-femenina": "Indumentaria femenina",
   bordados: "Bordados",
   estampados: "Estampados",
   liquidacion: "🔥 Liquidación"
@@ -138,13 +148,14 @@ async function cargarProductos() {
   }
 
   productosPorCategoria = {
-    guardapolvos: [],
-    remeras: [],
-    chombas: [],
-    bordados: [],
-    estampados: [],
-    liquidacion: []
-  };
+  guardapolvos: [],
+  remeras: [],
+  chombas: [],
+  bordados: [],
+  estampados: [],
+  "indumentaria-femenina": [],
+  liquidacion: []
+};
 
   data = data.filter((producto) => producto.imagen_url && producto.imagen_url.trim() !== "");
 
@@ -159,6 +170,8 @@ data.forEach((producto) => {
       productosPorCategoria.remeras.push(producto);
     } else if (categoria === "chombas") {
       productosPorCategoria.chombas.push(producto);
+    }else if (categoria === "indumentaria-femenina") {
+    productosPorCategoria["indumentaria-femenina"].push(producto);
     } else if (categoria === "bordados") {
       productosPorCategoria.bordados.push(producto);
     } else if (categoria === "estampados") {
@@ -181,12 +194,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   const cardCategorias = document.querySelectorAll(".categoria-card");
   const btnVolver = document.getElementById("btn-volver-categorias");
 
-  cardCategorias.forEach((card) => {
-    card.addEventListener("click", () => {
-      const categoria = card.dataset.categoria;
-      mostrarVistaProductos(categoria);
-    });
+ cardCategorias.forEach((card) => {
+  card.addEventListener("click", () => {
+    const categoria = card.dataset.categoria;
+
+    history.pushState(
+      { categoria: categoria },
+      "",
+      "#"+categoria
+    );
+
+    mostrarVistaProductos(categoria);
   });
+});
+
+
+window.addEventListener("popstate", () => {
+  mostrarVistaCategorias();
+
+  document.getElementById("vista-categorias").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+});
+
 
   btnVolver.addEventListener("click", () => {
     mostrarVistaCategorias();
