@@ -50,46 +50,54 @@
     </section>
 
     <section class="seccion" id="admin-box" style="display:none;">
-      <div class="admin-panel">
-        <div class="admin-formulario">
-          <h2 id="titulo-formulario">Agregar producto</h2>
-
-          <input type="text" id="nombre" placeholder="Nombre"><br><br>
-          <input type="text" id="descripcion" placeholder="Descripción"><br><br>
-          <input type="number" id="precio" placeholder="Precio (opcional)"><br><br>
-
-          <select id="categoria">
-            <option value="guardapolvos">Guardapolvos</option>
-            <option value="remeras">Remeras</option>
-            <option value="chombas">Chombas</option>
-            <option value="bordados">Bordados</option>
-            <option value="estampados">Estampados y Sublimados</option>
-          </select><br><br>
-
-          <input type="file" id="imagen" accept="image/*"><br><br>
-
-          <div class="preview-box">
-            <p><strong>Vista previa:</strong></p>
-            <img id="preview-imagen" src="" alt="Vista previa" style="display:none;">
-            <p id="sin-preview">No hay imagen seleccionada</p>
-          </div><br>
-
-          <label>
-            <input type="checkbox" id="liquidacion"> En liquidación
-          </label><br><br>
-
-         <div class="grupo-botones">
-         <button id="btn-guardar" class="btn-card" type="button">Guardar producto</button>
-         <button id="btn-cancelar-edicion" class="btn-card btn-secundario" type="button" style="display:none;">Cancelar edición</button>
-            
-        </div>
-        
-<p id="mensaje"></p>
-
-
-<div class="grupo-secundario">
-  <button id="btn-logout" class="btn-logout" type="button">Cerrar sesión</button>
+ <div class="admin-header">
+  <h2>Panel administrativo</h2>
+  <button id="btn-logout" class="btn-logout-admin" type="button">Cerrar sesión</button>
 </div>
+
+  <div class="admin-panel">
+
+  <div class="admin-formulario">
+
+    <h2 id="titulo-formulario">Agregar producto</h2>
+
+    <input type="text" id="nombre" placeholder="Nombre"><br><br>
+    <input type="text" id="descripcion" placeholder="Descripción"><br><br>
+    <input type="number" id="precio" placeholder="Precio (opcional)"><br><br>
+
+    <select id="categoria">
+      <option value="guardapolvos">Guardapolvos</option>
+      <option value="remeras">Remeras</option>
+      <option value="indumentaria-femenina">Indumentaria femenina</option>
+      <option value="chombas">Chombas</option>
+      <option value="bordados">Bordados</option>
+      <option value="estampados">Estampados y Sublimados</option>
+    </select><br><br>
+
+    <input type="file" id="imagen" accept="image/*"><br><br>
+
+    <div class="preview-box">
+      <p><strong>Vista previa:</strong></p>
+      <img id="preview-imagen" src="" alt="Vista previa" style="display:none;">
+      <p id="sin-preview">No hay imagen seleccionada</p>
+    </div><br>
+
+    <div class="campo-liquidacion">
+      <label for="liquidacion">🔥 En liquidación</label>
+      <input type="checkbox" id="liquidacion">
+    </div>
+
+    <div class="grupo-botones">
+      <button id="btn-guardar" class="btn-card" type="button">Guardar producto</button>
+      <button id="btn-cancelar-edicion" class="btn-card btn-secundario" type="button" style="display:none;">Cancelar edición</button>
+    </div>
+
+    <p id="mensaje"></p>
+
+  </div>
+
+
+
 
         <div class="admin-listado">
           <div class="barra-admin">
@@ -100,6 +108,7 @@
                 <option value="todos">Todas las categorías</option>
                 <option value="guardapolvos">Guardapolvos</option>
                 <option value="remeras">Remeras</option>
+                <option value="indumentaria-femenina">Indumentaria femenina</option>
                 <option value="chombas">Chombas</option>
                 <option value="bordados">Bordados</option>
                 <option value="estampados">Estampados y Sublimados</option>
@@ -131,8 +140,9 @@
     </section>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script src="supabase-config.js"></script>
 
   <script>
     const loginBox = document.getElementById("login-box");
@@ -161,6 +171,44 @@
 
     let productoEditandoId = null;
     let imagenActual = "";
+
+function esArchivoHeic(archivo) {
+  const nombre = archivo.name.toLowerCase();
+  return (
+    archivo.type === "image/heic" ||
+    archivo.type === "image/heif" ||
+    nombre.endsWith(".heic") ||
+    nombre.endsWith(".heif")
+  );
+}
+
+async function prepararImagenParaSubir(archivo) {
+  if (!archivo) return null;
+
+  if (!esArchivoHeic(archivo)) {
+    return archivo;
+  }
+
+  mensaje.textContent = "Convirtiendo imagen HEIC a JPG...";
+
+  const resultado = await heic2any({
+    blob: archivo,
+    toType: "image/jpeg",
+    quality: 0.9
+  });
+
+  const blobFinal = Array.isArray(resultado) ? resultado[0] : resultado;
+
+  const nombreFinal = archivo.name
+    .replace(/\.(heic|heif)$/i, "")
+    .concat(".jpg");
+
+  return new File([blobFinal], nombreFinal, {
+    type: "image/jpeg",
+    lastModified: Date.now()
+  });
+}
+
 
     function mostrarPreview(src) {
       if (src) {
@@ -391,22 +439,34 @@
       }
     }
 
-    btnLogin.addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
+ btnLogin.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-      const { error } = await window.supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
+  const { error } = await window.supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
-      btnRecuperar.addEventListener("click", async () => {
+  if (error) {
+    mensajeLogin.textContent = "Usuario o contraseña incorrectos";
+    console.error(error);
+    return;
+  }
+
+  mensajeLogin.textContent = "Ingreso correcto";
+  await verificarSesion();
+});
+
+btnRecuperar.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
 
   if (!email) {
     mensajeLogin.textContent = "Ingresá tu correo para recuperar la contraseña";
     return;
   }
+
+  mensajeLogin.textContent = "Enviando correo de recuperación...";
 
   const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + "/admin.html"
@@ -421,15 +481,6 @@
   mensajeLogin.textContent = "Te enviamos un correo para recuperar la contraseña";
 });
 
-      if (error) {
-        mensajeLogin.textContent = "Error al iniciar sesión";
-        console.error(error);
-        return;
-      }
-
-      mensajeLogin.textContent = "Ingreso correcto";
-      await verificarSesion();
-    });
 
     btnGuardar.addEventListener("click", async () => {
       const nombre = document.getElementById("nombre").value.trim();
@@ -450,11 +501,21 @@
       let seSubioNuevaImagen = false;
 
       if (archivo) {
-        const nombreArchivo = `${Date.now()}-${archivo.name}`;
+  let archivoFinal;
 
-        const { error: errorUpload } = await window.supabaseClient.storage
-          .from("productos")
-          .upload(nombreArchivo, archivo);
+  try {
+    archivoFinal = await prepararImagenParaSubir(archivo);
+  } catch (error) {
+    mensaje.textContent = "No se pudo convertir la imagen HEIC";
+    console.error(error);
+    return;
+  }
+
+  const nombreArchivo = `${Date.now()}-${archivoFinal.name}`;
+
+  const { error: errorUpload } = await window.supabaseClient.storage
+    .from("productos")
+    .upload(nombreArchivo, archivoFinal);
 
         if (errorUpload) {
           mensaje.textContent = "Error al subir imagen";
@@ -540,22 +601,30 @@
       await cargarProductosAdmin();
     });
 
-    inputImagen.addEventListener("change", () => {
-      const archivo = inputImagen.files[0];
+    inputImagen.addEventListener("change", async () => {
+  const archivo = inputImagen.files[0];
 
-      if (!archivo) {
-        mostrarPreview(imagenActual);
-        return;
-      }
+  if (!archivo) {
+    mostrarPreview(imagenActual);
+    return;
+  }
 
-      const lector = new FileReader();
+  try {
+    const archivoFinal = await prepararImagenParaSubir(archivo);
 
-      lector.onload = function(e) {
-        mostrarPreview(e.target.result);
-      };
+    const lector = new FileReader();
 
-      lector.readAsDataURL(archivo);
-    });
+    lector.onload = function(e) {
+      mostrarPreview(e.target.result);
+    };
+
+    lector.readAsDataURL(archivoFinal);
+  } catch (error) {
+    mensaje.textContent = "No se pudo mostrar la vista previa de la imagen";
+    console.error(error);
+    mostrarPreview("");
+  }
+});
 
     togglePassword.addEventListener("click", () => {
       const tipo = inputPassword.getAttribute("type");
